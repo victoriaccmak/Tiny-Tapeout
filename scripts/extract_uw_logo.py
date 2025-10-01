@@ -1,0 +1,1 @@
+# Script for extracting the University of Waterloo logo

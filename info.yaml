@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "test"      # Project title
-  author:       "joyce"      # Your name
+  title:        "OIIA Goose"      # Project title
+  author:       "Joyce Mai and Victoria Mak"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "this is the description"      # One line description of what your project does
+  description:  "OIIA Goose Demoscene Project"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -11,7 +11,7 @@ project:
   tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  top_module:  "tt_um_oiia_goose"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
@@ -23,34 +23,34 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "in0"
-  ui[1]: "in1"
-  ui[2]: "in2"
-  ui[3]: "in3"
-  ui[4]: "in4"
-  ui[5]: "in5"
-  ui[6]: "in6"
-  ui[7]: "in7"
+  ui[0]: "bg0"
+  ui[1]: "bg1"
+  ui[2]: ""
+  ui[3]: ""
+  ui[4]: ""
+  ui[5]: ""
+  ui[6]: ""
+  ui[7]: ""
 
   # Outputs
-  uo[0]: "o0"
-  uo[1]: "o1"
-  uo[2]: "o2"
-  uo[3]: "o3"
-  uo[4]: "o4"
-  uo[5]: "o5"
-  uo[6]: "o6"
-  uo[7]: "o7"
+  uo[0]: "R1"
+  uo[1]: "G1"
+  uo[2]: "B1"
+  uo[3]: "VSync"
+  uo[4]: "R0"
+  uo[5]: "G0"
+  uo[6]: "B0"
+  uo[7]: "HSync"
 
   # Bidirectional pins
-  uio[0]: "io0"
-  uio[1]: "io1"
-  uio[2]: "io2"
-  uio[3]: "io3"
-  uio[4]: "io4"
-  uio[5]: "io5"
-  uio[6]: "io6"
-  uio[7]: "io7"
+  uio[0]: "AudioPWM"
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
 
 # Do not change!
 yaml_version: 6
