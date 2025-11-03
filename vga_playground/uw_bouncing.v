@@ -1,28 +1,20 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2024 Uri Shaked
  * SPDX-License-Identifier: Apache-2.0
  */
 
 `default_nettype none
 
-module tt_um_oiia_goose (
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
-    input  wire [7:0] uio_in,   // IOs: Input path
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
-    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+module tt_um_vga_example(
+  input  wire [7:0] ui_in,    // Dedicated inputs
+  output wire [7:0] uo_out,   // Dedicated outputs
+  input  wire [7:0] uio_in,   // IOs: Input path
+  output wire [7:0] uio_out,  // IOs: Output path
+  output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+  input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+  input  wire       clk,      // clock
+  input  wire       rst_n     // reset_n - low to reset
 );
-
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
 
   // VGA signals
   wire hsync;
@@ -64,8 +56,8 @@ module tt_um_oiia_goose (
 
   // Define square position and size
   localparam UW_REC_HEIGHT = 50;
-  localparam U_LEN = 35;
-  localparam W_LEN = 50;
+  localparam U_REC_WIDTH = 35;
+  localparam W_REC_WIDTH = 50;
   localparam FONT_THICKNESS = 8;
   localparam SCREEN_PADDING = 50;
   
@@ -77,7 +69,7 @@ module tt_um_oiia_goose (
   
   wire [9:0] uw_right_edge;
   wire [9:0] uw_bot_edge;
-  assign uw_right_edge = u_x_pos_actual + (U_LEN + W_LEN);
+  assign uw_right_edge = u_x_pos_actual + (U_REC_WIDTH + W_REC_WIDTH);
   assign uw_bot_edge = uw_y_pos_actual + UW_REC_HEIGHT;
   
   wire [9:0] u_x_pos_actual;
@@ -85,18 +77,18 @@ module tt_um_oiia_goose (
   wire [9:0] uw_y_pos_actual;
 
   assign u_x_pos_actual = uw_x_pos_reduced * (H_VISIBLE / 64); // 64 because uw_x_pos_reduced can have values from 0 to 63.
-  assign w_x_pos_actual = u_x_pos_actual + U_LEN + FONT_THICKNESS;
+  assign w_x_pos_actual = u_x_pos_actual + U_REC_WIDTH + FONT_THICKNESS;
   assign uw_y_pos_actual = uw_y_pos_reduced * (V_VISIBLE / 64);
 
   reg bg_colx = 0;
   reg bg_coly = 1;
 
   wire in_u_rec;
-  assign in_u_rec = (pix_x >= u_x_pos_actual) && (pix_x < u_x_pos_actual + U_LEN) && 
+  assign in_u_rec = (pix_x >= u_x_pos_actual) && (pix_x < u_x_pos_actual + U_REC_WIDTH) && 
     (pix_y >= uw_y_pos_actual) && (pix_y < uw_y_pos_actual + UW_REC_HEIGHT);
   
   wire in_w_rec;
-  assign in_w_rec = (pix_x >= w_x_pos_actual) && (pix_x < w_x_pos_actual + W_LEN) && 
+  assign in_w_rec = (pix_x >= w_x_pos_actual) && (pix_x < w_x_pos_actual + W_REC_WIDTH) && 
     (pix_y >= uw_y_pos_actual) && (pix_y < uw_y_pos_actual + UW_REC_HEIGHT);
 
   wire [9:0] u_x = pix_x - u_x_pos_actual;
@@ -104,13 +96,13 @@ module tt_um_oiia_goose (
   wire [8:0] uw_y = pix_y - uw_y_pos_actual;
 
   wire inside_U_left_bar   = (u_x < FONT_THICKNESS);
-  wire inside_U_right_bar  = (u_x >= U_LEN - FONT_THICKNESS);
-  wire inside_U_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (u_x <= U_LEN);
+  wire inside_U_right_bar  = (u_x >= U_REC_WIDTH - FONT_THICKNESS);
+  wire inside_U_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (u_x <= U_REC_WIDTH);
   
   wire inside_W_left_bar   = (w_x < FONT_THICKNESS);
-  wire inside_W_mid_bar  = (w_x >= (W_LEN - FONT_THICKNESS) / 2) && (w_x <= (W_LEN + FONT_THICKNESS) / 2) && (uw_y >= UW_REC_HEIGHT / 2);
-  wire inside_W_right_bar  = (w_x >= W_LEN - FONT_THICKNESS);
-  wire inside_W_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (w_x <= W_LEN);
+  wire inside_W_mid_bar  = (w_x >= (W_REC_WIDTH - FONT_THICKNESS) / 2) && (w_x <= (W_REC_WIDTH + FONT_THICKNESS) / 2) && (uw_y >= UW_REC_HEIGHT / 2);
+  wire inside_W_right_bar  = (w_x >= W_REC_WIDTH - FONT_THICKNESS);
+  wire inside_W_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (w_x <= W_REC_WIDTH);
 
   wire inside_U = (inside_U_left_bar || inside_U_right_bar || inside_U_bottom_bar);
   wire inside_W = (inside_W_left_bar || inside_W_mid_bar || inside_W_right_bar || inside_W_bottom_bar);

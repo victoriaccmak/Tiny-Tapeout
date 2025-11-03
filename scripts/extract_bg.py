@@ -1,0 +1,1 @@
+# Script for extracting the background gif
