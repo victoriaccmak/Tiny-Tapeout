@@ -47,6 +47,7 @@ module tt_um_oiia_goose (
 
     // TinyVGA PMOD
     assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+    assign uio_out = {7'b0, sound};
 
     // Unused outputs assigned to 0.
     assign uio_out = 0;
@@ -65,15 +66,13 @@ module tt_um_oiia_goose (
         .vpos(pix_y)
     );
 
-    // bg_selector bg_selector_inst (
-    //     .bg_num(ui_in[1:0]),         // 2-bit background selector input
-    //     .clk(clk),                   // system clock
-    //     .rst_n(rst_n),               // active-low reset
-    //     .bg1_en(moving_grass_bg_en), // output 1
-    //     .bg2_en(uw_bouncing_bg_en),  // output 2
-    //     .bg3_en(blue_bg_en),         // output 3
-    //     .bg4_en(green_bg_en)         // output 4
-    // );
+    oiia_sound oiia_sound_inst(
+        .x(pix_x),
+        .y(pix_y),
+        .clk(clk),      // clock
+        .rst_n(rst_n),    // reset_n - low to reset
+        .sound(sound)
+    )
 
     moving_grass_bg moving_grass_bg_inst( 
         .clk(clk),                   // system clock
