@@ -16,152 +16,124 @@ module tt_um_oiia_goose (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+    // VGA signals
+    wire hsync;
+    wire vsync;
+    wire [1:0] R;
+    wire [1:0] G;
+    wire [1:0] B;
+    wire video_active;
+    wire [9:0] pix_x;
+    wire [9:0] pix_y;
+    wire sound;
+    reg [9:0] counter;
 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+    // Goose RGB
+    wire [1:0] goose_R;
+    wire [1:0] goose_G;
+    wire [1:0] goose_B;
 
-  // VGA signals
-  wire hsync;
-  wire vsync;
-  wire [1:0] R;
-  wire [1:0] G;
-  wire [1:0] B;
-  wire video_active;
-  wire [9:0] pix_x;
-  wire [9:0] pix_y;
-  wire sound;
+    // Background RGB
+    wire [1:0] moving_grass_R;
+    wire [1:0] moving_grass_G;
+    wire [1:0] moving_grass_B;
+    wire [1:0] uw_bouncing_R;
+    wire [1:0] uw_bouncing_G;
+    wire [1:0] uw_bouncing_B;
 
-  // TinyVGA PMOD
-  assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+    wire in_goose;
 
-  // Unused outputs assigned to 0.
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+    // wire moving_grass_bg_en, uw_bouncing_bg_en, blue_bg_en, green_bg_en;
 
-  // Suppress unused signals warning
-  wire _unused_ok = &{ena, ui_in, uio_in};
+    // TinyVGA PMOD
+    assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
 
-  reg [9:0] counter;
+    // Unused outputs assigned to 0.
+    assign uio_out = 0;
+    assign uio_oe    = 0;
 
-  hvsync_generator hvsync_gen(
-    .clk(clk),
-    .reset(~rst_n),
-    .hsync(hsync),
-    .vsync(vsync),
-    .display_on(video_active),
-    .hpos(pix_x),
-    .vpos(pix_y)
-  );
-  
-  wire [9:0] moving_x = pix_x + counter;
+    // Suppress unused signals warning
+    wire _unused_ok = &{ena, ui_in, uio_in};
 
-  localparam H_VISIBLE = 640;
-  localparam V_VISIBLE = 480;
+    hvsync_generator hvsync_gen(
+        .clk(clk),
+        .reset(~rst_n),
+        .hsync(hsync),
+        .vsync(vsync),
+        .display_on(video_active),
+        .hpos(pix_x),
+        .vpos(pix_y)
+    );
 
-  // Define square position and size
-  localparam UW_REC_HEIGHT = 50;
-  localparam U_LEN = 35;
-  localparam W_LEN = 50;
-  localparam FONT_THICKNESS = 8;
-  localparam SCREEN_PADDING = 50;
-  
-  reg uw_x_dir_right = 1;
-  reg uw_y_dir_down = 1;
+    // bg_selector bg_selector_inst (
+    //     .bg_num(ui_in[1:0]),         // 2-bit background selector input
+    //     .clk(clk),                   // system clock
+    //     .rst_n(rst_n),               // active-low reset
+    //     .bg1_en(moving_grass_bg_en), // output 1
+    //     .bg2_en(uw_bouncing_bg_en),  // output 2
+    //     .bg3_en(blue_bg_en),         // output 3
+    //     .bg4_en(green_bg_en)         // output 4
+    // );
 
-  reg [5:0] uw_x_pos_reduced;
-  reg [5:0] uw_y_pos_reduced;
-  
-  wire [9:0] uw_right_edge;
-  wire [9:0] uw_bot_edge;
-  assign uw_right_edge = u_x_pos_actual + (U_LEN + W_LEN);
-  assign uw_bot_edge = uw_y_pos_actual + UW_REC_HEIGHT;
-  
-  wire [9:0] u_x_pos_actual;
-  wire [9:0] w_x_pos_actual;
-  wire [9:0] uw_y_pos_actual;
-
-  assign u_x_pos_actual = uw_x_pos_reduced * (H_VISIBLE / 64); // 64 because uw_x_pos_reduced can have values from 0 to 63.
-  assign w_x_pos_actual = u_x_pos_actual + U_LEN + FONT_THICKNESS;
-  assign uw_y_pos_actual = uw_y_pos_reduced * (V_VISIBLE / 64);
-
-  reg bg_colx = 0;
-  reg bg_coly = 1;
-
-  wire in_u_rec;
-  assign in_u_rec = (pix_x >= u_x_pos_actual) && (pix_x < u_x_pos_actual + U_LEN) && 
-    (pix_y >= uw_y_pos_actual) && (pix_y < uw_y_pos_actual + UW_REC_HEIGHT);
-  
-  wire in_w_rec;
-  assign in_w_rec = (pix_x >= w_x_pos_actual) && (pix_x < w_x_pos_actual + W_LEN) && 
-    (pix_y >= uw_y_pos_actual) && (pix_y < uw_y_pos_actual + UW_REC_HEIGHT);
-
-  wire [9:0] u_x = pix_x - u_x_pos_actual;
-  wire [9:0] w_x = pix_x - w_x_pos_actual;
-  wire [8:0] uw_y = pix_y - uw_y_pos_actual;
-
-  wire inside_U_left_bar   = (u_x < FONT_THICKNESS);
-  wire inside_U_right_bar  = (u_x >= U_LEN - FONT_THICKNESS);
-  wire inside_U_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (u_x <= U_LEN);
-  
-  wire inside_W_left_bar   = (w_x < FONT_THICKNESS);
-  wire inside_W_mid_bar  = (w_x >= (W_LEN - FONT_THICKNESS) / 2) && (w_x <= (W_LEN + FONT_THICKNESS) / 2) && (uw_y >= UW_REC_HEIGHT / 2);
-  wire inside_W_right_bar  = (w_x >= W_LEN - FONT_THICKNESS);
-  wire inside_W_bottom_bar = (uw_y >= UW_REC_HEIGHT - FONT_THICKNESS) && (w_x <= W_LEN);
-
-  wire inside_U = (inside_U_left_bar || inside_U_right_bar || inside_U_bottom_bar);
-  wire inside_W = (inside_W_left_bar || inside_W_mid_bar || inside_W_right_bar || inside_W_bottom_bar);
+    moving_grass_bg moving_grass_bg_inst( 
+        .clk(clk),                   // system clock
+        .rst_n(rst_n),               // active-low reset
+        .counter(counter),
+        .video_active(video_active),
+        .pix_x(pix_x),
+        .pix_y(pix_y),
+        .R(moving_grass_R),
+        .G(moving_grass_G),
+        .B(moving_grass_B),
+    );
     
-  assign R = video_active ? ((in_u_rec && inside_U) || (in_w_rec && inside_W) ? 2'b11 : {bg_colx, bg_coly}) : 2'b00;
-  assign G = video_active ? ((in_u_rec && inside_U) || (in_w_rec && inside_W) ? 2'b10 : {bg_colx, bg_coly}) : 2'b00;
-  assign B = video_active ? ((in_u_rec && inside_U) || (in_w_rec && inside_W) ? 2'b11 : {bg_colx, bg_coly}) : 2'b00;
+    uw_bouncing_bg uw_bouncing_bg_inst( 
+        .clk(clk),                   // system clock
+        .rst_n(rst_n),               // active-low reset
+        .counter(counter),
+        .video_active(video_active),
+        .pix_x(pix_x),
+        .pix_y(pix_y),
+        .R(uw_bouncing_R),
+        .G(uw_bouncing_G),
+        .B(uw_bouncing_B),
+    );
 
-always @(posedge vsync or negedge rst_n) begin
-  if (~rst_n) begin
-    counter <= 0;
-    uw_x_pos_reduced <= SCREEN_PADDING;
-    uw_y_pos_reduced <= SCREEN_PADDING;
-    uw_x_dir_right <= 1'b1;
-    uw_y_dir_down  <= 1'b1;
-  end else begin
-    counter <= counter + 1;
+    // Insert goose module
+    // One of the outputs should be:
+    //      output wire in_goose;
 
-    if (counter & 1 == 1) begin
-      // Move horizontally
-      if (uw_x_dir_right) begin
-        uw_x_pos_reduced <= uw_x_pos_reduced + 1;
-      end else begin
-        uw_x_pos_reduced <= uw_x_pos_reduced - 1;
-      end
+    always @(posedge vsync or negedge rst_n) begin
+        if (~rst_n) begin
+            counter <= 0;
+        end else begin
+            counter <= counter + 1;
 
-      // Move vertically
-      if (uw_y_dir_down) begin
-        uw_y_pos_reduced <= uw_y_pos_reduced + 1;
-      end else begin
-        uw_y_pos_reduced <= uw_y_pos_reduced - 1;
-      end
-
-      // Bounce off edges
-      if (uw_right_edge >= H_VISIBLE - SCREEN_PADDING) begin
-        bg_colx <= 1;
-        uw_x_dir_right <= 1'b0; // move left
-      end else if (u_x_pos_actual <= SCREEN_PADDING) begin
-        bg_colx <= 1;
-        uw_x_dir_right <= 1'b1; // move right
-      end else begin
-        bg_colx <= 0;
-      end
-
-      if (uw_bot_edge >= V_VISIBLE - SCREEN_PADDING) begin
-        uw_y_dir_down <= 1'b0;  // move up
-      end else if (uw_y_pos_actual <= SCREEN_PADDING) begin
-        uw_y_dir_down <= 1'b1;  // move down
-      end
-    end
-  end
-end
-  
+            if (in_goose) begin
+                R = goose_R;
+                G = goose_G;
+                B = goose_B;
+            end else begin
+                // Choose colors based on selected background
+                case (ui_in[1:0])
+                    2'b00:
+                        R = moving_grass_R;
+                        G = moving_grass_G;
+                        B = moving_grass_B;
+                    2'b01:
+                        R = uw_bouncing_R;
+                        G = uw_bouncing_G;
+                        B = uw_bouncing_B;
+                    2'b10:
+                        R = 2'b00;
+                        G = 2'b01;
+                        B = 2'b11;
+                    2'b11:
+                        R = 2'b00;
+                        G = 2'b11;
+                        B = 2'b01;
+                endcase
+            end
+        end
+    end  
 endmodule
