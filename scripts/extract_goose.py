@@ -78,13 +78,13 @@ for i in range(0, 3):
     frame = frame.convert('P', palette=palette)
     indexed_data = np.array(frame)
     for row in indexed_data:
+        print('    ', ''.join([f'{x:01x},' for x in row]) + ''.join(['0,' for _ in range(64-len(row))]))
         goosehex.write(' '.join([f'{x:01x}' for x in row]) + ' ' + ' '.join(['0' for _ in range(64-len(row))]) + '\n')
         
 print('  };')
 print('end')
 
 # fill goose.hex with x's up to 16384 entries
-print("filling goose.hex with %d x's" % (16384 - datasiz))
 for _ in range(16384 - datasiz):
     goosehex.write('x ')
 goosehex.write('\n')
