@@ -17,7 +17,7 @@ module moving_grass_bg(
     // outputs
     output wire [1:0] R,
     output wire [1:0] G,
-    output wire [1:0] B,
+    output wire [1:0] B
 );
 
     localparam H_VISIBLE = 640;
