@@ -76,7 +76,7 @@ for i in range(0, 4):
     frame = goose_gif.copy()
     
     frame = frame.convert('P', palette=palette)
-    indexed_data = np.array(frame)[::3, ::3]
+    indexed_data = np.array(frame)[::6, ::6]
     for row in indexed_data:
         print('    ', ''.join([f'{x:01x},' for x in row]) + ''.join(['0,' for _ in range(64-len(row))]))
         goosehex.write(' '.join([f'{x:01x}' for x in row]) + ' ' + ' '.join(['0' for _ in range(64-len(row))]) + '\n')
