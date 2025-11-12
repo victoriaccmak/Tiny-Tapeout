@@ -62,7 +62,7 @@ if True:
     palb.close()
 
 # frame_count * sprite_width * sprite_height
-datasiz = 4 * 64 * 64
+datasiz = 4 * 32 * 32
 
 goosehex = open("data_hex/goose.hex", "w")
 
@@ -71,12 +71,12 @@ print('initial begin')
 print('  goose = \'{')
 
 # Extract and process each frame
-for i in range(0, 3):
+for i in range(0, 4):
     goose_gif.seek(i)
     frame = goose_gif.copy()
     
     frame = frame.convert('P', palette=palette)
-    indexed_data = np.array(frame)
+    indexed_data = np.array(frame)[::3, ::3]
     for row in indexed_data:
         print('    ', ''.join([f'{x:01x},' for x in row]) + ''.join(['0,' for _ in range(64-len(row))]))
         goosehex.write(' '.join([f'{x:01x}' for x in row]) + ' ' + ' '.join(['0' for _ in range(64-len(row))]) + '\n')
@@ -85,8 +85,8 @@ print('  };')
 print('end')
 
 # fill goose.hex with x's up to 16384 entries
-for _ in range(16384 - datasiz):
-    goosehex.write('x ')
+# for _ in range(16384 - datasiz):
+#     goosehex.write('x ')
 goosehex.write('\n')
 
 goosehex.close()
