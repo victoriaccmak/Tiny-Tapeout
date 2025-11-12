@@ -50,7 +50,6 @@ module tt_um_oiia_goose (
     assign uio_out = {7'b0, sound};
 
     // Unused outputs assigned to 0.
-    assign uio_out = 0;
     assign uio_oe    = 0;
 
     // Suppress unused signals warning
