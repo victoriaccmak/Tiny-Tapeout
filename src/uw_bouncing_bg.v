@@ -80,7 +80,7 @@ module uw_bouncing_bg(
     assign G = video_active ? ((in_u_rec && inside_U) || (in_w_rec && inside_W) ? 2'b10 : {bg_colx, bg_coly}) : 2'b00;
     assign B = video_active ? ((in_u_rec && inside_U) || (in_w_rec && inside_W) ? 2'b11 : {bg_colx, bg_coly}) : 2'b00;
 
-    always @(posedge vsync or negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
             uw_x_pos_reduced <= SCREEN_PADDING;
             uw_y_pos_reduced <= SCREEN_PADDING;

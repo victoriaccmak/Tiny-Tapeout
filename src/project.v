@@ -72,7 +72,7 @@ module tt_um_oiia_goose (
         .clk(clk),      // clock
         .rst_n(rst_n),    // reset_n - low to reset
         .sound(sound)
-    )
+    );
 
     moving_grass_bg moving_grass_bg_inst( 
         .clk(clk),                   // system clock

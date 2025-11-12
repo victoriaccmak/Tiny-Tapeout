@@ -103,7 +103,7 @@ module moving_grass_bg(
 
   
     // Animate movement (back and forth)
-    always @(posedge vsync or negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
             grass_mvmt <= 1;
             grass_dir <= 1;
