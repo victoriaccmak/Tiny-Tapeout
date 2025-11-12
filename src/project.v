@@ -84,7 +84,7 @@ module tt_um_oiia_goose (
         .pix_y(pix_y),
         .R(moving_grass_R),
         .G(moving_grass_G),
-        .B(moving_grass_B),
+        .B(moving_grass_B)
     );
     
     uw_bouncing_bg uw_bouncing_bg_inst( 
@@ -96,42 +96,62 @@ module tt_um_oiia_goose (
         .pix_y(pix_y),
         .R(uw_bouncing_R),
         .G(uw_bouncing_G),
-        .B(uw_bouncing_B),
+        .B(uw_bouncing_B)
     );
 
     // Insert goose module
-    // One of the outputs should be:
-    //      output wire in_goose;
+    goose_sprite goose_inst (
+        .clk(clk),
+        .rst_n(rst_n),
+        .pix_x(pix_x),
+        .pix_y(pix_y),
+        .R(goose_R),
+        .G(goose_G),
+        .B(goose_B),
+        .in_goose(in_goose)
+    );
 
-    always @(posedge vsync or negedge rst_n) begin
+    reg [1:0] R_reg, G_reg, B_reg;
+    assign R = R_reg;
+    assign G = G_reg;
+    assign B = B_reg;
+
+    always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
             counter <= 0;
+            R_reg <= 0;
+            G_reg <= 0;
+            B_reg <= 0;
         end else begin
             counter <= counter + 1;
 
             if (in_goose) begin
-                R = goose_R;
-                G = goose_G;
-                B = goose_B;
+                R_reg <= goose_R;
+                G_reg <= goose_G;
+                B_reg <= goose_B;
             end else begin
                 // Choose colors based on selected background
                 case (ui_in[1:0])
-                    2'b00:
-                        R = moving_grass_R;
-                        G = moving_grass_G;
-                        B = moving_grass_B;
-                    2'b01:
-                        R = uw_bouncing_R;
-                        G = uw_bouncing_G;
-                        B = uw_bouncing_B;
-                    2'b10:
-                        R = 2'b00;
-                        G = 2'b01;
-                        B = 2'b11;
-                    2'b11:
-                        R = 2'b00;
-                        G = 2'b11;
-                        B = 2'b01;
+                    2'b00: begin
+                        R_reg <= moving_grass_R;
+                        G_reg <= moving_grass_G;
+                        B_reg <= moving_grass_B;
+                    end
+                    2'b01: begin
+                        R_reg <= uw_bouncing_R;
+                        G_reg <= uw_bouncing_G;
+                        B_reg <= uw_bouncing_B;
+                    end
+                    2'b10: begin
+                        R_reg <= 2'b00;
+                        G_reg <= 2'b01;
+                        B_reg <= 2'b11;
+                    end
+                    2'b11: begin
+                        R_reg <= 2'b00;
+                        G_reg <= 2'b11;
+                        B_reg <= 2'b01;
+                    end
                 endcase
             end
         end
