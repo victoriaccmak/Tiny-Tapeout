@@ -34,22 +34,22 @@ module goose_sprite (
 
     wire [9:0] rel_x = pix_x - GOOSE_X;
     wire [9:0] rel_y = pix_y - GOOSE_Y;
-    wire inside = (rel_x < GOOSE_WIDTH) && (rel_y < GOOSE_HEIGHT);
+    wire in_bounds = (rel_x < GOOSE_WIDTH) && (rel_y < GOOSE_HEIGHT);
 
     // --- OUTPUT COLOR ---
     reg [7:0] goose_idx;
     always @(posedge clk) begin
         if (!rst_n)
             goose_idx <= 0;
-        else if (inside)
+        else if (in_bounds)
             goose_idx <= goose_mem[rel_y * GOOSE_WIDTH + rel_x];
         else
             goose_idx <= 0;
     end
 
-    assign R = inside ? palette_r[goose_idx] : 2'b00;
-    assign G = inside ? palette_g[goose_idx] : 2'b00;
-    assign B = inside ? palette_b[goose_idx] : 2'b00;
-    assign in_goose = inside;
+    assign R = in_bounds ? palette_r[goose_idx] : 2'b00;
+    assign G = in_bounds ? palette_g[goose_idx] : 2'b00;
+    assign B = in_bounds ? palette_b[goose_idx] : 2'b00;
+    assign in_goose = in_bounds;
 
 endmodule
