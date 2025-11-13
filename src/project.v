@@ -98,16 +98,16 @@ module tt_um_oiia_goose (
     );
 
     // Insert goose module
-    goose_sprite goose_inst (
-        .clk(clk),
-        .rst_n(rst_n),
-        .pix_x(pix_x),
-        .pix_y(pix_y),
-        .R(goose_R),
-        .G(goose_G),
-        .B(goose_B),
-        .in_goose(in_goose)
-    );
+    // goose_sprite goose_inst (
+    //     .clk(clk),
+    //     .rst_n(rst_n),
+    //     .pix_x(pix_x),
+    //     .pix_y(pix_y),
+    //     .R(goose_R),
+    //     .G(goose_G),
+    //     .B(goose_B),
+    //     .in_goose(in_goose)
+    // );
 
     reg [1:0] R_reg, G_reg, B_reg;
     assign R = R_reg;
